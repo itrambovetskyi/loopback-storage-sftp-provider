@@ -2,6 +2,7 @@ const connect = require('ssh2-connect');
 const fs = require('ssh2-fs');
 const EventEmitter = require(`events`);
 const util = require('util');
+const { Transform } = require('stream');
 
 
 /**
@@ -216,20 +217,64 @@ class FSSSH extends EventEmitter {
      *
      * @param source
      * @param options
-     * @returns {Promise<any>}
+     * @param cb
+     * @returns {*}
      */
-    createReadStream(source, options) {
-        return fs.createReadStream(this._ssh, source, options);
+    createReadStream(source, options, cb) {
+        const stream = new Transform({
+            transform(chunk, encoding, callback) {
+                callback(null, chunk);
+            }
+        });
+
+        fs.createReadStream(this._ssh, source, options, (err, readStream) => {
+            if (err) {
+                stream.emit(`error`, err);
+            } else {
+                readStream.pipe(stream);
+                stream.on('finish', () => stream.emit('success'));
+            }
+        });
+
+        return stream;
     }
 
     /**
      *
      * @param path
      * @param options
-     * @returns {Promise<any>}
+     * @param cb
+     * @returns {*}
      */
-    createWriteStream(path, options) {
-        return fs.createWriteStream(this._ssh, path, options);
+    createWriteStream(path, options, cb) {
+        let isWriteStreamReady = false;
+        const chunksCallbacks = [];
+        const stream = new Transform({
+            transform(chunk, encoding, callback) {
+                if (isWriteStreamReady) {
+                    callback(null, chunk);
+                } else {
+                    chunksCallbacks.push({ callback, chunk });
+                }
+            }
+        });
+
+        this._ee.on(`writeStreamReady`, () => {
+            chunksCallbacks.forEach(({ callback, chunk }) => callback(null, chunk));
+            isWriteStreamReady = true;
+        });
+
+        fs.createWriteStream(this._ssh, path, options, (err, writeStream) => {
+            if (err) {
+                stream.emit('error', err)
+            } else {
+                stream.pipe(writeStream);
+                stream.on('finish', () => stream.emit('success'));
+                this._ee.emit(`writeStreamReady`);
+            }
+        });
+
+        return stream;
     }
 }
 

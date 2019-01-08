@@ -305,16 +305,12 @@ class SFTPProvider {
         }
 
         try {
-            const stream = this.fs.createWriteStream(
+            return this.fs.createWriteStream(
                 SFTPProvider.normalizePath(path.join(this.root, options.container, options.remote)),{
                     flags: options.flags || 'w+',
                     encoding: options.encoding || null,
                     mode: options.mode || parseInt('0666', 8),
                 });
-
-            stream.on('finish', () => stream.emit('success'));
-
-            return stream;
         } catch (err) {
             return this.writeStreamError(err, cb);
         }
