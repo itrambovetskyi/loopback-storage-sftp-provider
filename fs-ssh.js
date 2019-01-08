@@ -232,6 +232,7 @@ class FSSSH extends EventEmitter {
                 stream.emit(`error`, err);
             } else {
                 readStream.pipe(stream);
+                readStream.on(`error`, (err) => stream.emit(`error`, err));
                 stream.on('finish', () => stream.emit('success'));
             }
         });
@@ -266,10 +267,11 @@ class FSSSH extends EventEmitter {
 
         fs.createWriteStream(this._ssh, path, options, (err, writeStream) => {
             if (err) {
-                stream.emit('error', err)
+                stream.emit('error', err);
             } else {
                 stream.pipe(writeStream);
                 stream.on('finish', () => stream.emit('success'));
+                writeStream.on(`error`, (err) => stream.emit(`error`, err));
                 this._ee.emit(`writeStreamReady`);
             }
         });
