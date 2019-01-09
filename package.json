@@ -1,6 +1,6 @@
 {
   "name": "loopback-storage-sftp-provider",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "SFTP provider for loopback-component-storage (Loopback 3 framework)",
   "main": "index.js",
   "scripts": {},

@@ -4,7 +4,7 @@ const uniqID = require('uniq-id');
 const fs = require('ssh2-fs');
 const EventEmitter = require(`events`);
 const util = require('util');
-const { Transform } = require('stream');
+const { PassThrough } = require('stream');
 
 
 /**
@@ -252,32 +252,15 @@ class FSSSH extends EventEmitter {
      * @returns {*}
      */
     createWriteStream(path, options, cb) {
-        let isWriteStreamReady = false;
-        const emitterNameId = uniqID();
-        const chunksCallbacks = [];
-        const stream = new Transform({
-            transform(chunk, encoding, callback) {
-                if (isWriteStreamReady) {
-                    callback(null, chunk);
-                } else {
-                    chunksCallbacks.push({ callback, chunk });
-                }
-            }
-        });
-
-        this._ee.once(emitterNameId, () => {
-            chunksCallbacks.forEach(({ callback, chunk }) => callback(null, chunk));
-            isWriteStreamReady = true;
-        });
+        const stream = new PassThrough();
 
         fs.createWriteStream(this._ssh, path, options, (err, writeStream) => {
             if (err) {
                 stream.emit('error', err);
             } else {
                 stream.pipe(writeStream);
-                stream.on('finish', () => stream.emit('success'));
+                writeStream.on('finish', () => stream.emit('success'));
                 writeStream.on(`error`, (err) => stream.emit(`error`, err));
-                this._ee.emit(emitterNameId);
             }
         });
 
