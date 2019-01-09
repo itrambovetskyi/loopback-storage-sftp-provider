@@ -263,7 +263,7 @@ class FSSSH extends EventEmitter {
             }
         });
 
-        this._ee.on(`writeStreamReady`, () => {
+        this._ee.once(`writeStreamReady`, () => {
             chunksCallbacks.forEach(({ callback, chunk }) => callback(null, chunk));
             isWriteStreamReady = true;
         });
