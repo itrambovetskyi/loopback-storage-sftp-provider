@@ -1,5 +1,6 @@
 const connect = require('ssh2-connect');
 const debug = require(`debug`)(`fs-ssh`);
+const uniqID = require('uniq-id');
 const fs = require('ssh2-fs');
 const EventEmitter = require(`events`);
 const util = require('util');
@@ -252,6 +253,7 @@ class FSSSH extends EventEmitter {
      */
     createWriteStream(path, options, cb) {
         let isWriteStreamReady = false;
+        const emitterNameId = uniqID();
         const chunksCallbacks = [];
         const stream = new Transform({
             transform(chunk, encoding, callback) {
@@ -263,7 +265,7 @@ class FSSSH extends EventEmitter {
             }
         });
 
-        this._ee.once(`writeStreamReady`, () => {
+        this._ee.once(emitterNameId, () => {
             chunksCallbacks.forEach(({ callback, chunk }) => callback(null, chunk));
             isWriteStreamReady = true;
         });
@@ -275,7 +277,7 @@ class FSSSH extends EventEmitter {
                 stream.pipe(writeStream);
                 stream.on('finish', () => stream.emit('success'));
                 writeStream.on(`error`, (err) => stream.emit(`error`, err));
-                this._ee.emit(`writeStreamReady`);
+                this._ee.emit(emitterNameId);
             }
         });
 
