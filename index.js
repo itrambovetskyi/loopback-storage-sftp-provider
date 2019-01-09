@@ -1,5 +1,5 @@
 const g = require('strong-globalize')();
-const debug = require(`debug`)(`fs-ssh`);
+const debug = require(`debug`)(`loopback-storage-sftp-provider`);
 const path = require('path');
 const stream = require('stream');
 const util = require('util');

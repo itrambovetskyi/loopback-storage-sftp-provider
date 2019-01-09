@@ -1,4 +1,5 @@
 const connect = require('ssh2-connect');
+const debug = require(`debug`)(`fs-ssh`);
 const fs = require('ssh2-fs');
 const EventEmitter = require(`events`);
 const util = require('util');
@@ -27,10 +28,12 @@ class FSSSH extends EventEmitter {
         connect({ host, port, username, password }, (err, ssh) => {
             if(err) {
                 this._isReady = false;
+                debug(err);
                 this.emit(`error`, err);
             } else {
                 this._ssh = ssh;
                 this._isReady = true;
+                debug(`Connected to SFTP on ${host}:${port} as ${username}`);
                 this._ee.emit(`ready`);
             }
         });
