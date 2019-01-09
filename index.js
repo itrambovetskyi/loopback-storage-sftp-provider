@@ -1,4 +1,5 @@
 const g = require('strong-globalize')();
+const debug = require(`debug`)(`fs-ssh`);
 const path = require('path');
 const stream = require('stream');
 const util = require('util');
@@ -96,6 +97,8 @@ class SFTPProvider {
         this.root = root;
         this.writeStreamError = SFTPProvider.streamError.bind(null, new stream.Writable());
         this.readStreamError = SFTPProvider.streamError.bind(null, new stream.Readable());
+
+        this.fs.on(`error`, (err) => debug(err));
     }
 
     /**

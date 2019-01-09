@@ -1,6 +1,6 @@
 {
   "name": "loopback-storage-sftp-provider",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "SFTP provider for loopback-component-storage (Loopback 3 framework)",
   "main": "index.js",
   "scripts": {},
@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/itrambovetskyi/loopback-storage-sftp-provider#readme",
   "dependencies": {
+    "debug": "^4.1.1",
     "pkgcloud": "^1.7.0",
     "ssh2-connect": "^2.0.4",
     "ssh2-fs": "^0.3.6",
