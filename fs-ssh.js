@@ -1,10 +1,9 @@
 const connect = require('ssh2-connect');
 const debug = require(`debug`)(`fs-ssh`);
-const uniqID = require('uniq-id');
 const fs = require('ssh2-fs');
 const EventEmitter = require(`events`);
 const util = require('util');
-const { PassThrough } = require('stream');
+const { Transform, PassThrough } = require('stream');
 
 
 /**
